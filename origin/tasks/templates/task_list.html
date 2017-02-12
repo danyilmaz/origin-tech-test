@@ -1,0 +1,9 @@
+<a href="{% url 'tasks:create_new' %}">Add new task</a>
+{% for object in object_list %}
+    <div>{{ object.name }}</div>
+    <div>{{ object.description }}</div>
+    <div>{{ object.get_status_display }}</div>
+    <a href="{% url 'tasks:edit' pk=object.pk %}">Edit</a>
+    <a href="#">Done</a>
+    <button>Delete</button>
+{% endfor %}
