@@ -22,3 +22,9 @@ class Task(models.Model):
     status = models.CharField(max_length=1, choices=STATUSES, default=TODO_STATUS)
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+
+    @property
+    def is_done(self):
+        if self.status in [self.DELETED_STATUS, self.COMPLETED_STATUS]:
+            return True
+        return False

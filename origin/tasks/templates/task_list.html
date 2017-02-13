@@ -4,6 +4,20 @@
     <div>{{ object.description }}</div>
     <div>{{ object.get_status_display }}</div>
     <a href="{% url 'tasks:edit' pk=object.pk %}">Edit</a>
-    <a href="#">Done</a>
-    <button>Delete</button>
+    {% if object.is_done %}
+        <form method="post" action="{% url 'tasks:mark_not_done' pk=object.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">Mark not done</button>
+        </form>
+    {% else %}
+        <form method="post" action="{% url 'tasks:mark_done' pk=object.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">Mark done</button>
+        </form>
+    {% endif %}
+
+    <form method="post" action="#">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
 {% endfor %}
