@@ -2,16 +2,17 @@ from django.views.generic import ListView, CreateView, UpdateView, RedirectView,
 from tasks.forms import CreateTaskForm
 from tasks.models import Task
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 
 class ListTasksView(ListView):
     model = Task
     template_name = 'task_list.html'
     paginate_by = 30
+    queryset = Task.objects.exclude(status=Task.DELETED_STATUS)
 
 
 class CreateTaskView(CreateView):
@@ -21,8 +22,7 @@ class CreateTaskView(CreateView):
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
-        # form_kwargs['user'] = self.request.user
-        form_kwargs['user'] = User.objects.get()
+        form_kwargs['user'] = self.request.user
         return form_kwargs
 
 
@@ -32,45 +32,50 @@ class EditTaskView(UpdateView):
     success_url = reverse_lazy('tasks:task_list')
     fields = ['name', 'description']
 
+    def get_object(self):
+        obj = get_object_or_404(pk=self.kwargs['pk'], created_by=self.request.user)
+        return obj
+
 
 class BaseStatusToggleView(RedirectView):
-    """Base view to set the mandate active or inactive.
-    Child classes should inherit from this view and provide a boolean 'is_active'
-    attribute and a string 'success_message' attribute.
-    """
-    status = None
     success_message = None
 
     def get_redirect_url(self):
         return reverse_lazy('tasks:task_list')
 
     def post(self, request, *args, **kwargs):
-        task = get_object_or_404(Task, pk=self.kwargs['pk'])
-        task.status = self.status
-        task.save()
+        self.object = get_object_or_404(Task, pk=self.kwargs['pk'])
+        self.update_task()
+        self.object.save()
         messages.success(request, self.success_message)
         return HttpResponseRedirect(self.get_redirect_url())
 
 
 class MarkDoneStatusView(BaseStatusToggleView):
-    status = Task.COMPLETED_STATUS
     success_message = 'Task marked as Done'
+
+    def update_task(self):
+        self.object.status = Task.COMPLETED_STATUS
+        self.object.completed_at = timezone.now()
+        self.object.completed_by = self.request.user
 
 
 class MarkNotDoneStatusView(BaseStatusToggleView):
-    status = Task.TODO_STATUS
     success_message = 'Task marked as To Do'
+
+    def update_task(self):
+        self.object.status = Task.TODO_STATUS
+        self.object.completed_at = None
+        self.object.completed_by = None
 
 
 class DeleteTaskView(DeleteView):
-    model = Lender
-    success_url = reverse_lazy('lender:list_lenders')
-    pk_url_kwarg = 'lender_pk'
+    model = Task
+    success_url = reverse_lazy('tasks:task_list')
     template_name = 'delete_lender.html'
 
     def delete(self, request, *args, **kwargs):
-        http_response = super(DeleteLenderView, self).delete(request, *args, **kwargs)
-        for lend_order in self.object.lend_orders.filter(deleted_at__isnull=True):
-            lend_order.deleted_at = datetime.datetime.now()
-            lend_order.save()
-        return JsonResponse(dict(url=http_response.url), status=200)
+        self.object = get_object_or_404(pk=self.kwargs['pk'], created_by=self.request.user)
+        success_url = self.get_success_url()
+        self.object.delete(user=request.user)
+        return HttpResponseRedirect(success_url)

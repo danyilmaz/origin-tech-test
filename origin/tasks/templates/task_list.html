@@ -1,3 +1,4 @@
+<a href="{% url 'logout' %}">Logout</a>
 <a href="{% url 'tasks:create_new' %}">Add new task</a>
 {% for object in object_list %}
     <div>{{ object.name }}</div>
@@ -16,7 +17,7 @@
         </form>
     {% endif %}
 
-    <form method="post" action="#">
+    <form method="post" action="{% url 'tasks:delete' pk=object.pk %}">
         {% csrf_token %}
         <button class="btn btn-danger" type="submit">Delete</button>
     </form>

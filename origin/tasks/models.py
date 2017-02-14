@@ -4,6 +4,8 @@ from django.utils import timezone
 
 
 class Task(models.Model):
+    """A task in the todo list.
+    """
     TODO_STATUS = 'T'
     COMPLETED_STATUS = 'C'
     DELETED_STATUS = 'D'
@@ -25,6 +27,16 @@ class Task(models.Model):
 
     @property
     def is_done(self):
+        """A property to tell us whether we should consider a task done or not based on its status
+        """
         if self.status in [self.DELETED_STATUS, self.COMPLETED_STATUS]:
             return True
         return False
+
+    def delete(self, user):
+        """Custom delete method. We only want to mark tasks as deleted so that the history of the database makes sense
+        """
+        self.deleted_at = timezone.now()
+        self.status = self.DELETED_STATUS
+        self.deleted_by = user
+        self.save()
