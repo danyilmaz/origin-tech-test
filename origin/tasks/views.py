@@ -12,7 +12,13 @@ class ListTasksView(ListView):
     model = Task
     template_name = 'task_list.html'
     paginate_by = 30
+    hide_completed = False
     queryset = Task.objects.exclude(status=Task.DELETED_STATUS)
+
+    def get_queryset(self):
+        if self.hide_completed:
+            return Task.objects.exclude(status__in=[Task.DELETED_STATUS, Task.COMPLETED_STATUS])
+        return Task.objects.exclude(status=Task.DELETED_STATUS)
 
 
 class CreateTaskView(CreateView):
@@ -33,7 +39,7 @@ class EditTaskView(UpdateView):
     fields = ['name', 'description']
 
     def get_object(self):
-        obj = get_object_or_404(pk=self.kwargs['pk'], created_by=self.request.user)
+        obj = get_object_or_404(Task, pk=self.kwargs['pk'], created_by=self.request.user)
         return obj
 
 
@@ -75,7 +81,7 @@ class DeleteTaskView(DeleteView):
     template_name = 'delete_lender.html'
 
     def delete(self, request, *args, **kwargs):
-        self.object = get_object_or_404(pk=self.kwargs['pk'], created_by=self.request.user)
+        self.object = get_object_or_404(Task, pk=self.kwargs['pk'], created_by=self.request.user)
         success_url = self.get_success_url()
         self.object.delete(user=request.user)
         return HttpResponseRedirect(success_url)

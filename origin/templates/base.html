@@ -1,0 +1,24 @@
+{% load static %}
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+        <title>{% block title %}{% endblock title %}</title>
+    </head>
+    <body>
+        <header id="header" class="navbar">
+        <div class="container">
+            <ul class="nav nav-tabs offset-3">
+                {% block header %}
+                    {% include 'partials/header.html' %}
+                {% endblock header %}
+            </ul>
+        </div>
+        </header>
+        <div id="content" class="row-fluid">
+            <div class="container">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </div>
+    </body>
+</html>

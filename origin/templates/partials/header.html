@@ -1,0 +1,14 @@
+<li>
+    <a href="{% url 'tasks:create_new' %}">Add new task</a>
+</li>
+<li>
+    {% url 'tasks:task_list' as show_all %}
+    {% if request.path == show_all %}
+        <a href="{% url 'tasks:task_list_hide_completed' %}">Hide completed</a>
+    {% else %}
+        <a href="{% url 'tasks:task_list' %}">Show all</a>
+    {% endif %}
+</li>
+<li>
+    <a href="{% url 'logout' %}">Logout</a>
+</li>

@@ -1,5 +1,9 @@
-<form method="post" action="{% url 'tasks:create_new' %}">
+{% extends 'base.html' %}
+
+{% block content %}
+<form class="form" method="post" action="{% url 'tasks:create_new' %}">
   {% csrf_token %}
   {{form.as_p}}
   <button class="btn btn-danger" type="submit">Add</button>
 </form>
+{% endblock content %}

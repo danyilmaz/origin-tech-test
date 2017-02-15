@@ -118,6 +118,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
-
+STATIC_ROOT = '%s/static' % os.getcwd()
 STATIC_URL = '/static/'
 LOGIN_REDIRECT_URL = 'tasks:task_list'
+
+LOGIN_URL = 'login'
